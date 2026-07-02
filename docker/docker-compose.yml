@@ -1,0 +1,22 @@
+# Postgres local para desenvolvimento do Oracle Borderless.
+# Uso: docker compose -f docker/docker-compose.yml up -d
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: oracle_borderless_db
+    environment:
+      POSTGRES_USER: oracle
+      POSTGRES_PASSWORD: oracle
+      POSTGRES_DB: oracle_borderless
+    ports:
+      - "5432:5432"
+    volumes:
+      - oracle_borderless_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oracle -d oracle_borderless"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  oracle_borderless_pgdata:
