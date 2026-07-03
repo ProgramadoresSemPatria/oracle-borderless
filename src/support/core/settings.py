@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     DB_USER: str = "oracle"
     DB_PASSWORD: str = "oracle"
     DB_NAME: str = "oracle_borderless"
+    DB_NAME_TEST: str = "oracle_borderless_test"
     DB_POOL_SIZE: int = 20
     DB_MAX_OVERFLOW: int = 10
     DB_POOL_TIMEOUT: int = 30
@@ -49,6 +50,19 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str | None = None
     OPENAI_MODEL: str = "gpt-4o"
 
+    # --- Embeddings (desacoplado do provedor de chat; ver ADR-0008) ---
+    EMBEDDING_PROVIDER: Literal["openai"] = "openai"
+    EMBEDDING_MODEL: str = "text-embedding-3-small"
+    EMBEDDING_DIM: int = 1536
+
+    # --- Web search (Tavily) ---
+    TAVILY_API_KEY: str | None = None
+
+    # --- RAG ---
+    RAG_TOP_K: int = 6
+    RAG_CHUNK_SIZE: int = 1200
+    RAG_CHUNK_OVERLAP: int = 200
+
     @property
     def database_url_async(self) -> str:
         """URL do engine assíncrono (asyncpg)."""
@@ -63,6 +77,14 @@ class Settings(BaseSettings):
         return (
             f"postgresql+psycopg://{self.DB_USER}:{self.DB_PASSWORD}"
             f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        )
+
+    @property
+    def database_url_async_test(self) -> str:
+        """URL async do banco de testes (usado pela suíte de integração)."""
+        return (
+            f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}"
+            f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME_TEST}"
         )
 
     @property
