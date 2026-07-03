@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtualenv / uv
+.venv/
+.python-version.local
+
+# Ambiente
+.env
+.env.local
+.env.*.local
+
+# Testes / cobertura
+.pytest_cache/
+.coverage
+htmlcov/
+.prospector.yaml.local
+
+# IDE / SO
+.idea/
+.vscode/
+.DS_Store
+*.swp
+
+# Logs
+*.log
