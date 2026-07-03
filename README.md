@@ -1,38 +1,38 @@
 # Oracle Borderless
 
-Um **agente de IA no estilo "Claude Code" reposicionado como oráculo**: uma *single source of truth* consultável em linguagem natural. Qualquer pessoa faz uma pergunta em linguagem natural e recebe uma resposta útil, confiável e amigável, baseada **exclusivamente em fontes aprovadas**.
+A **"Claude Code"-style AI agent repositioned as an oracle**: a *single source of truth* queryable in natural language. Anyone asks a question in natural language and gets a useful, reliable, and friendly answer, based **exclusively on approved sources**.
 
-## O que é
+## What it is
 
-- **Base de conhecimento no Notion via MCP** (Model Context Protocol) — o agente consome apenas documentos liberados.
-- **Perguntas em linguagem natural** sobre regras de negócio do ecossistema e dados operacionais (ex.: resultados de alunos), com respostas em linguagem clara.
-- **Nada confidencial** é ingerido ou exposto — o conteúdo vem só de fontes permitidas pelas restrições de acesso do MCP do Notion.
-- Pensado para **produção**, com URL/domínio próprio e aparência de produto.
+- **Knowledge base in Notion via MCP** (Model Context Protocol) — the agent consumes only released documents.
+- **Natural-language questions** about the ecosystem's business rules and operational data (e.g., student results), with answers in plain language.
+- **Nothing confidential** is ingested or exposed — content comes only from sources permitted by the Notion MCP's access restrictions.
+- Built for **production**, with its own URL/domain and a product-like appearance.
 
 ## Stack
 
 - **Framework:** FastAPI (Python 3.13+)
 - **ORM:** SQLAlchemy 2.0 (async `asyncpg` + sync `psycopg`)
 - **Migrations:** Alembic
-- **Validação:** Pydantic v2
-- **Base de conhecimento:** Notion via MCP
-- **Scheduler:** APScheduler (jobstore PostgreSQL)
+- **Validation:** Pydantic v2
+- **Knowledge base:** Notion via MCP
+- **Scheduler:** APScheduler (PostgreSQL jobstore)
 - **Package manager:** UV
 
-## Arquitetura
+## Architecture
 
-Padrão **Spatie Laravel Beyond CRUD adaptado ao FastAPI**, em três camadas:
+**Spatie Laravel Beyond CRUD pattern adapted to FastAPI**, in three layers:
 
-- `src/app/` — pontos de entrada (HTTP, console/jobs)
-- `src/domain/` — negócio, organizado por subdomínio (bounded contexts)
-- `src/support/` — ferramental transversal (infra, integrações, utils)
+- `src/app/` — entry points (HTTP, console/jobs)
+- `src/domain/` — business logic, organized by subdomain (bounded contexts)
+- `src/support/` — cross-cutting tooling (infra, integrations, utils)
 
-Comece por **[`CLAUDE.md`](CLAUDE.md)** (regras e visão condensada) e **[`docs/architecture.md`](docs/architecture.md)** (arquitetura completa).
+Start with **[`CLAUDE.md`](CLAUDE.md)** (rules and condensed overview) and **[`docs/architecture.md`](docs/architecture.md)** (full architecture).
 
-## Rodando em desenvolvimento
+## Running in development
 
 ```bash
-# Subir a aplicação
+# Start the application
 uvicorn main:app --reload
 
 # Migrations
@@ -41,20 +41,20 @@ alembic upgrade head
 # Seeds
 python -m database.seeds
 
-# Testes
+# Tests
 pytest
 ```
 
-## Pontos em aberto
+## Open questions
 
-Ainda a decidir em conjunto (não inventar): interface (chat web vs. contexto de código), arquitetura interna do agente, estratégia de ingestão/atualização da base de conhecimento e a **camada de autenticação** (haverá auth restrita ao ecossistema; mecanismo a definir).
+Still to be decided together (don't make assumptions): the interface (web chat vs. code context), the agent's internal architecture, the knowledge base ingestion/update strategy, and the **authentication layer** (there will be auth restricted to the ecosystem; the mechanism is yet to be defined).
 
-## Documentação
+## Documentation
 
-- [`docs/architecture.md`](docs/architecture.md) — arquitetura completa
+- [`docs/architecture.md`](docs/architecture.md) — full architecture
 - [`docs/actions-vs-services.md`](docs/actions-vs-services.md) — Action vs Domain Service
-- [`docs/conventions.md`](docs/conventions.md) — naming e estilo
-- [`docs/adding-new-domain.md`](docs/adding-new-domain.md) — criar subdomínio novo
+- [`docs/conventions.md`](docs/conventions.md) — naming and style
+- [`docs/adding-new-domain.md`](docs/adding-new-domain.md) — creating a new subdomain
 - [`docs/database-guide.md`](docs/database-guide.md) — migrations, seeds, factories
-- [`docs/testing-guide.md`](docs/testing-guide.md) — testes
-- [`docs/scaffolding-guide.md`](docs/scaffolding-guide.md) — comandos `make:*`
+- [`docs/testing-guide.md`](docs/testing-guide.md) — testing
+- [`docs/scaffolding-guide.md`](docs/scaffolding-guide.md) — `make:*` commands
