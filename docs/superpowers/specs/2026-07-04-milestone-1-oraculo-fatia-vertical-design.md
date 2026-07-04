@@ -55,7 +55,7 @@ Segue Entity ≠ Model + Mapper + Repository (ADR-0003).
 
 ### Models (SQLAlchemy)
 - `DocumentModel` (`documents`): conforme exemplo do CLAUDE.md (`notion_page_id` unique+index, `status` index).
-- `DocumentChunkModel` (`document_chunks`): `document_id` (FK → documents), `ordinal`, `content` (Text), `embedding` = coluna `Vector(settings.EMBEDDING_DIM)` via `pgvector.sqlalchemy.Vector`. Índice para busca por similaridade (ivfflat/hnsw — decisão de implementação; começar simples, HNSW cosine se disponível).
+- `DocumentChunkModel` (`document_chunks`): `document_id` (FK → documents), `ordinal`, `content` (Text), `embedding` = coluna `Vector(settings.EMBEDDING_DIM)` via `pgvector.sqlalchemy.Vector`. Índice **HNSW com `vector_cosine_ops`** para busca por similaridade (melhor recall/latência de leitura; custo maior de escrita/memória é aceitável no volume inicial de um oráculo interno). Criado na migration junto da tabela.
 
 ### Mappers
 - `DocumentMapper` e `DocumentChunkMapper` (`to_entity` / `to_model_attrs`).
