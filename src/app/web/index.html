@@ -31,6 +31,10 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question, history: [] }),
       });
+      if (!resp.ok) {
+        answerEl.textContent = "Erro: " + resp.status;
+        return;
+      }
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
@@ -47,9 +51,22 @@
           if (!dataLine) continue;
           const data = JSON.parse(dataLine.slice(5).trim());
           if (type === "token") answerEl.textContent += data.text;
+          if (type === "error") answerEl.textContent += "\n[erro: " + data.message + "]";
           if (type === "sources") {
-            sourcesEl.innerHTML = "<strong>Fontes:</strong><br>" +
-              data.citations.map(c => `• <a href="${c.url}">${c.title}</a> (${c.source_type})`).join("<br>");
+            sourcesEl.innerHTML = "";
+            const strong = document.createElement("strong");
+            strong.textContent = "Fontes:";
+            sourcesEl.appendChild(strong);
+            sourcesEl.appendChild(document.createElement("br"));
+            data.citations.forEach((c, i) => {
+              if (i > 0) sourcesEl.appendChild(document.createElement("br"));
+              sourcesEl.appendChild(document.createTextNode("• "));
+              const link = document.createElement("a");
+              link.setAttribute("href", c.url);
+              link.textContent = c.title;
+              sourcesEl.appendChild(link);
+              sourcesEl.appendChild(document.createTextNode(" (" + c.source_type + ")"));
+            });
           }
         }
       }
