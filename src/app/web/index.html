@@ -61,10 +61,23 @@
             data.citations.forEach((c, i) => {
               if (i > 0) sourcesEl.appendChild(document.createElement("br"));
               sourcesEl.appendChild(document.createTextNode("• "));
-              const link = document.createElement("a");
-              link.setAttribute("href", c.url);
-              link.textContent = c.title;
-              sourcesEl.appendChild(link);
+              let safeUrl = null;
+              try {
+                const parsed = new URL(c.url);
+                if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+                  safeUrl = parsed.href;
+                }
+              } catch (e) {
+                safeUrl = null;
+              }
+              if (safeUrl) {
+                const link = document.createElement("a");
+                link.setAttribute("href", safeUrl);
+                link.textContent = c.title;
+                sourcesEl.appendChild(link);
+              } else {
+                sourcesEl.appendChild(document.createTextNode(c.title));
+              }
               sourcesEl.appendChild(document.createTextNode(" (" + c.source_type + ")"));
             });
           }
