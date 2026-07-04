@@ -38,3 +38,43 @@ async def test_search_similar_returns_nearest_approved(db_session):
     assert hits[0].content == "trecho perto"
     assert hits[0].citation.title == "Regras"
     assert hits[0].citation.is_notion()
+
+
+@pytest.mark.asyncio
+async def test_search_similar_excludes_non_approved_and_deleted(db_session):
+    now = datetime(2026, 1, 1)
+
+    approved_doc = await DocumentRepository().upsert(
+        Document(uuid4(), f"pid-{uuid4()}", "Regras Aprovadas", "c", "https://n", "approved", now, now, None)
+    )
+    pending_doc = await DocumentRepository().upsert(
+        Document(uuid4(), f"pid-{uuid4()}", "Rascunho Pendente", "c", "https://n", "pending", now, now, None)
+    )
+    deleted_doc = await DocumentRepository().upsert(
+        Document(uuid4(), f"pid-{uuid4()}", "Documento Removido", "c", "https://n", "approved", now, now, now)
+    )
+    await db_session.flush()
+
+    chunk_repo = DocumentChunkRepository()
+    # Approved chunk is FAR from the query vector.
+    await chunk_repo.replace_for_document(
+        approved_doc.uuid,
+        [DocumentChunk(uuid4(), approved_doc.uuid, 0, "trecho aprovado", _vec(-1.0))],
+    )
+    # Pending and soft-deleted chunks are CLOSE to the query vector (nearest neighbors).
+    await chunk_repo.replace_for_document(
+        pending_doc.uuid,
+        [DocumentChunk(uuid4(), pending_doc.uuid, 0, "trecho pendente", _vec(1.0))],
+    )
+    await chunk_repo.replace_for_document(
+        deleted_doc.uuid,
+        [DocumentChunk(uuid4(), deleted_doc.uuid, 0, "trecho deletado", _vec(1.0))],
+    )
+    await db_session.flush()
+
+    hits = await chunk_repo.search_similar(_vec(1.0), top_k=5)
+
+    contents = [hit.content for hit in hits]
+    assert "trecho pendente" not in contents
+    assert "trecho deletado" not in contents
+    assert contents == ["trecho aprovado"]
