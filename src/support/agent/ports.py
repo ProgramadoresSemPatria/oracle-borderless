@@ -22,7 +22,18 @@ class AgentStreamChunk:
     citations: list[Citation] = field(default_factory=list)
 
 
+@dataclass
+class KnowledgeSnippet:
+    """Trecho recuperado da base (RAG clássico), com sua fonte para citação."""
+
+    content: str
+    citation: Citation
+
+
 class OracleEnginePort(Protocol):
     def stream_answer(
-        self, question: str, history: list[AgentMessage]
+        self,
+        question: str,
+        history: list[AgentMessage],
+        knowledge: list[KnowledgeSnippet],
     ) -> AsyncIterator[AgentStreamChunk]: ...
