@@ -36,9 +36,8 @@ def _collect_seeders() -> list:
     ]
 
     if settings.ENVIRONMENT == "development":
-        # from database.seeds.dev_documents_seed import DevDocumentsSeed
-        # seeders.append(DevDocumentsSeed)
-        pass
+        from database.seeds.dev_documents_seed import DevDocumentsSeed
+        seeders.append(DevDocumentsSeed)
 
     return seeders
 
