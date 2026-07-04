@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Oracle Borderless</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+    #answer { white-space: pre-wrap; border: 1px solid #ddd; border-radius: 8px; padding: 1rem; min-height: 4rem; }
+    #sources { margin-top: 1rem; font-size: .9rem; color: #555; }
+    input, button { font-size: 1rem; padding: .5rem; }
+    #q { width: 100%; box-sizing: border-box; margin-bottom: .5rem; }
+  </style>
+</head>
+<body>
+  <h1>Oracle Borderless</h1>
+  <input id="q" placeholder="Faça sua pergunta..." />
+  <button id="send">Perguntar</button>
+  <h3>Resposta</h3>
+  <div id="answer"></div>
+  <div id="sources"></div>
+  <script>
+    const answerEl = document.getElementById("answer");
+    const sourcesEl = document.getElementById("sources");
+    document.getElementById("send").onclick = async () => {
+      answerEl.textContent = "";
+      sourcesEl.innerHTML = "";
+      const question = document.getElementById("q").value;
+      const resp = await fetch("/conversations/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question, history: [] }),
+      });
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const events = buffer.split("\n\n");
+        buffer = events.pop();
+        for (const evt of events) {
+          const lines = evt.split("\n");
+          const type = (lines.find(l => l.startsWith("event:")) || "").slice(6).trim();
+          const dataLine = lines.find(l => l.startsWith("data:"));
+          if (!dataLine) continue;
+          const data = JSON.parse(dataLine.slice(5).trim());
+          if (type === "token") answerEl.textContent += data.text;
+          if (type === "sources") {
+            sourcesEl.innerHTML = "<strong>Fontes:</strong><br>" +
+              data.citations.map(c => `• <a href="${c.url}">${c.title}</a> (${c.source_type})`).join("<br>");
+          }
+        }
+      }
+    };
+  </script>
+</body>
+</html>
