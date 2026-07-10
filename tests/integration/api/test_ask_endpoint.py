@@ -1,17 +1,14 @@
 from typing import AsyncIterator
+from uuid import UUID
 
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import text
 
 
 @pytest_asyncio.fixture(autouse=True)
 async def _dispose_db_engine_between_tests():
-    """Cada teste roda em seu próprio event loop (asyncio_mode=auto, escopo function).
-    O engine assíncrono global (src.support.core.database.engine) é criado uma única
-    vez no import e mantém conexões asyncpg presas ao loop do teste anterior — sem
-    dispose, o segundo teste que bate no app real (via ASGITransport) reusa uma
-    conexão de um loop fechado. Descartar o pool aqui isola os testes deste arquivo."""
     yield
     from src.support.core.database import engine
 
@@ -19,9 +16,6 @@ async def _dispose_db_engine_between_tests():
 
 
 class FailingOracleEngine:
-    """Motor fake que emite um chunk de texto e então explode — simula falha
-    no meio do streaming, depois que os headers 200 + SSE já foram enviados."""
-
     async def stream_answer(self, question, history, knowledge=None) -> AsyncIterator:
         from src.support.agent.ports import AgentStreamChunk
 
@@ -29,15 +23,25 @@ class FailingOracleEngine:
         raise RuntimeError("boom: engine caiu no meio do stream")
 
 
+def _parse_conversation_id(body: str) -> str:
+    # localiza o bloco "event: conversation" e lê o data da linha seguinte
+    import json
+
+    blocks = body.split("\n\n")
+    for b in blocks:
+        if "event: conversation" in b:
+            data_line = next(l for l in b.split("\n") if l.startswith("data:"))
+            return json.loads(data_line[5:].strip())["id"]
+    raise AssertionError("evento 'conversation' não emitido")
+
+
 @pytest.mark.asyncio
-async def test_ask_streams_sse(monkeypatch):
+async def test_ask_streams_and_persists_both_turns(monkeypatch):
     import src.app.api.controllers.conversation_controller as ctrl
     from tests.fakes.fake_embeddings_client import FakeEmbeddingsClient
     from tests.fakes.fake_oracle_engine import FakeOracleEngine
 
     monkeypatch.setattr(ctrl, "get_oracle_engine", lambda: FakeOracleEngine(answer="resposta de teste"))
-    # A base pode estar vazia no banco de teste; isolamos de rede trocando o client
-    # de embeddings real (que chamaria a OpenAI) pelo fake determinístico.
     monkeypatch.setattr(ctrl, "get_embeddings_client", lambda: FakeEmbeddingsClient())
 
     from main import app
@@ -46,17 +50,36 @@ async def test_ask_streams_sse(monkeypatch):
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         resp = await client.post(
             "/conversations/ask",
-            json={"question": "o que é o onboarding?", "history": []},
+            json={"question": "o que é o onboarding?"},
         )
         assert resp.status_code == 200
         assert "text/event-stream" in resp.headers["content-type"]
         body = resp.text
+        assert "event: conversation" in body
         assert "resposta" in body
-        assert "sources" in body  # evento final de fontes
+        assert "event: sources" in body
+        assert "event: done" in body
+
+    conversation_id = UUID(_parse_conversation_id(body))
+
+    # verifica persistência num escopo de sessão próprio
+    from src.support.core.database import AsyncSessionLocal
+
+    async with AsyncSessionLocal() as s:
+        rows = (
+            await s.execute(
+                text("SELECT role FROM messages WHERE conversation_id = :cid ORDER BY created_at"),
+                {"cid": conversation_id},
+            )
+        ).scalars().all()
+        assert rows == ["user", "assistant"]
+        # cleanup (evita acúmulo entre execuções)
+        await s.execute(text("DELETE FROM conversations WHERE uuid = :cid"), {"cid": conversation_id})
+        await s.commit()
 
 
 @pytest.mark.asyncio
-async def test_ask_stream_failure_emits_error_and_done(monkeypatch):
+async def test_ask_failure_emits_error_and_does_not_persist_assistant(monkeypatch):
     import src.app.api.controllers.conversation_controller as ctrl
     from tests.fakes.fake_embeddings_client import FakeEmbeddingsClient
 
@@ -67,14 +90,22 @@ async def test_ask_stream_failure_emits_error_and_done(monkeypatch):
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        resp = await client.post(
-            "/conversations/ask",
-            json={"question": "o que é o onboarding?", "history": []},
-        )
-        # Headers já foram enviados (200) antes da falha ocorrer no meio do stream;
-        # o erro é sinalizado via evento SSE, não via status code.
+        resp = await client.post("/conversations/ask", json={"question": "o que é o onboarding?"})
         assert resp.status_code == 200
-        assert "text/event-stream" in resp.headers["content-type"]
         body = resp.text
         assert "event: error" in body
         assert "event: done" in body
+
+    conversation_id = UUID(_parse_conversation_id(body))
+    from src.support.core.database import AsyncSessionLocal
+
+    async with AsyncSessionLocal() as s:
+        roles = (
+            await s.execute(
+                text("SELECT role FROM messages WHERE conversation_id = :cid"),
+                {"cid": conversation_id},
+            )
+        ).scalars().all()
+        assert "assistant" not in roles  # resposta parcial NÃO foi persistida
+        await s.execute(text("DELETE FROM conversations WHERE uuid = :cid"), {"cid": conversation_id})
+        await s.commit()
