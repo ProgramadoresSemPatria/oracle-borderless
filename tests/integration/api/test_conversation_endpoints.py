@@ -50,6 +50,7 @@ async def _seed_conversation(user_email: str):
 async def test_list_and_get_conversation():
     email = "lister@x.com"
     cid = await _seed_conversation(email)
+    other_cid = await _seed_conversation("someoneelse@x.com")
     from main import app
 
     transport = ASGITransport(app=app)
@@ -59,6 +60,8 @@ async def test_list_and_get_conversation():
         assert listing.status_code == 200
         ids = [c["id"] for c in listing.json()]
         assert str(cid) in ids
+        # Cross-user filtering: outra pessoa não pode aparecer na minha listagem.
+        assert str(other_cid) not in ids
 
         detail = await client.get(f"/conversations/{cid}", headers=headers)
         assert detail.status_code == 200
@@ -71,7 +74,10 @@ async def test_list_and_get_conversation():
     from src.support.core.database import AsyncSessionLocal
 
     async with AsyncSessionLocal() as s:
-        await s.execute(text("DELETE FROM conversations WHERE uuid = :cid"), {"cid": cid})
+        await s.execute(
+            text("DELETE FROM conversations WHERE uuid IN (:cid, :other_cid)"),
+            {"cid": cid, "other_cid": other_cid},
+        )
         await s.commit()
 
 
