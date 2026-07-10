@@ -5,8 +5,19 @@ import pytest
 
 from src.domain.conversations.actions.answer_question_action import AnswerQuestionAction
 from src.domain.conversations.entities.conversation import Conversation
-from src.support.agent.ports import AgentStreamChunk
-from src.support.core.exceptions import NotFoundError
+from src.domain.conversations.entities.message import Message
+from src.support.agent.ports import AgentMessage, AgentStreamChunk
+from src.support.core.exceptions import NotFoundError, UnauthorizedDomainError
+
+
+def _msg(content: str, role: str = "user", conversation_id=None) -> Message:
+    return Message(
+        uuid=uuid4(),
+        conversation_id=conversation_id or uuid4(),
+        role=role,
+        content=content,
+        created_at=datetime(2026, 7, 10, tzinfo=timezone.utc),
+    )
 
 
 class _FakeSearch:
@@ -37,16 +48,19 @@ class _FakeConvRepo:
 
 
 class _FakeMsgRepo:
+    """Fake acoplado: `load_recent` reflete o que já foi gravado (simula ler as
+    linhas persistidas). Assim o teste de ordem realmente pega o bug de
+    append-antes-de-load — a pergunta atual apareceria no histórico."""
+
     def __init__(self):
         self.appended = []
-        self.recent = []
 
     async def append(self, message):
         self.appended.append(message)
         return message
 
     async def load_recent(self, cid):
-        return self.recent
+        return [AgentMessage(role=m.role, content=m.content) for m in self.appended]
 
 
 def _make(engine, search, conv_repo, msg_repo):
@@ -86,12 +100,38 @@ async def test_recency_loaded_before_appending_current_message():
     now = datetime(2026, 7, 10, tzinfo=timezone.utc)
     existing = Conversation(uuid4(), "a@x.com", "T", now, now, None)
     engine, msg_repo = _FakeEngine(), _FakeMsgRepo()
-    from src.support.agent.ports import AgentMessage
-    msg_repo.recent = [AgentMessage(role="user", content="turno anterior")]
+    # turno ANTERIOR já persistido antes deste execute()
+    msg_repo.appended.append(_msg("turno anterior", conversation_id=existing.uuid))
     action = _make(engine, _FakeSearch(), _FakeConvRepo(existing=existing), msg_repo)
 
     _, stream = await action.execute("nova pergunta", existing.uuid, "a@x.com")
     [c async for c in stream]
 
-    # histórico passado ao engine = turnos anteriores, sem a pergunta atual
-    assert engine.received_history == [AgentMessage(role="user", content="turno anterior")]
+    # histórico passado ao engine = turnos anteriores, sem a pergunta atual.
+    # Com o fake acoplado, se a Action gravasse antes de carregar, "nova pergunta"
+    # apareceria aqui e o teste falharia.
+    contents = [m.content for m in engine.received_history]
+    assert contents == ["turno anterior"]
+    assert "nova pergunta" not in contents
+
+
+@pytest.mark.asyncio
+async def test_mismatched_owner_propagates_unauthorized():
+    now = datetime(2026, 7, 10, tzinfo=timezone.utc)
+    existing = Conversation(uuid4(), "a@x.com", "T", now, now, None)
+    action = _make(_FakeEngine(), _FakeSearch(), _FakeConvRepo(existing=existing), _FakeMsgRepo())
+
+    with pytest.raises(UnauthorizedDomainError):
+        await action.execute("oi", existing.uuid, "b@x.com")
+
+
+@pytest.mark.asyncio
+async def test_long_question_title_is_truncated_to_80_chars():
+    engine, conv_repo, msg_repo = _FakeEngine(), _FakeConvRepo(), _FakeMsgRepo()
+    action = _make(engine, _FakeSearch(), conv_repo, msg_repo)
+
+    long_question = "x" * 200
+    _, stream = await action.execute(long_question, None, "a@x.com")
+    [c async for c in stream]
+
+    assert len(conv_repo.created.title) == 80
