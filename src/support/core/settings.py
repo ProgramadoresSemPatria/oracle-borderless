@@ -63,6 +63,10 @@ class Settings(BaseSettings):
     RAG_CHUNK_SIZE: int = 1200
     RAG_CHUNK_OVERLAP: int = 200
 
+    # Memória episódica (M2) — recência carregada na working memory
+    MEMORY_RECENCY_TOKEN_BUDGET: int = 2000
+    MEMORY_RECENCY_MAX_MESSAGES: int = 50
+
     @property
     def database_url_async(self) -> str:
         """URL do engine assíncrono (asyncpg)."""
