@@ -7,10 +7,16 @@ from fastapi import Request
 from fastapi.responses import StreamingResponse
 
 from src.app.api.requests.ask_question_request import AskQuestionRequest
+from src.app.api.responses.conversation_responses import (
+    ConversationDetailResponse,
+    ConversationSummaryResponse,
+)
 from src.domain.conversations.actions.answer_question_action import AnswerQuestionAction
 from src.domain.conversations.actions.append_assistant_message_action import (
     AppendAssistantMessageAction,
 )
+from src.domain.conversations.actions.get_conversation_action import GetConversationAction
+from src.domain.conversations.actions.list_conversations_action import ListConversationsAction
 from src.domain.documents.actions.search_knowledge_base_action import SearchKnowledgeBaseAction
 from src.support.agent.oracle_engine import get_oracle_engine
 from src.support.clients.embeddings.embeddings_client import get_embeddings_client
@@ -74,6 +80,20 @@ class ConversationController:
             yield _sse("done", {})
 
         return StreamingResponse(event_source(), media_type="text/event-stream")
+
+    @staticmethod
+    async def list(request: Request) -> list[ConversationSummaryResponse]:
+        user_email = request.headers.get(_USER_EMAIL_HEADER)
+        conversations = await ListConversationsAction().execute(user_email)
+        return [ConversationSummaryResponse.from_entity(c) for c in conversations]
+
+    @staticmethod
+    async def get(request: Request, conversation_id: UUID) -> ConversationDetailResponse:
+        user_email = request.headers.get(_USER_EMAIL_HEADER)
+        conversation, messages = await GetConversationAction().execute(
+            conversation_id, user_email
+        )
+        return ConversationDetailResponse.from_entity(conversation, messages)
 
 
 async def _persist_assistant(conversation_id: UUID, content: str, citations: list) -> None:
