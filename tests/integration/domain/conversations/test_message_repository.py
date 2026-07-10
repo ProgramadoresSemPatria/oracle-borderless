@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 import pytest
+from uuid6 import uuid7
 
 from src.domain.conversations.entities.conversation import Conversation
 from src.domain.conversations.entities.message import Message
@@ -19,7 +20,9 @@ async def _new_conversation(db_session) -> "Conversation":
 
 
 def _msg(conversation_id, role, content):
-    return Message(uuid4(), conversation_id, role, content, datetime.now(timezone.utc))
+    # uuid7 (não uuid4) para espelhar a produção: o tiebreak de ordenação do repo é por
+    # uuid, e só é determinístico porque uuid7 é monotônico crescente por inserção.
+    return Message(uuid7(), conversation_id, role, content, datetime.now(timezone.utc))
 
 
 @pytest.mark.asyncio
