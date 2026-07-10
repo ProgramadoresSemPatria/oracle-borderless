@@ -37,7 +37,11 @@ class MessageRepository:
         stmt = (
             select(MessageModel)
             .where(MessageModel.conversation_id == conversation_id)
-            .order_by(MessageModel.created_at.desc())
+            # Tiebreak por uuid: created_at é server-side func.now(), que no Postgres é o
+            # timestamp de início da transação — turnos gravados na mesma transação teriam
+            # created_at idêntico. uuid7 (HasUUID) é gerado client-side e é monotônico
+            # crescente por inserção, garantindo ordem determinística.
+            .order_by(MessageModel.created_at.desc(), MessageModel.uuid.desc())
             .limit(settings.MEMORY_RECENCY_MAX_MESSAGES)
         )
         rows = (await self.session.execute(stmt)).scalars().all()  # mais novo → mais antigo
@@ -59,7 +63,10 @@ class MessageRepository:
         stmt = (
             select(MessageModel)
             .where(MessageModel.conversation_id == conversation_id)
-            .order_by(MessageModel.created_at.asc())
+            # Tiebreak por uuid: created_at (func.now()) fica congelado no início da transação,
+            # então turnos da mesma transação empatam; uuid7 é client-side monotônico e
+            # desempata na ordem de inserção — cronológico determinístico.
+            .order_by(MessageModel.created_at.asc(), MessageModel.uuid.asc())
         )
         rows = (await self.session.execute(stmt)).scalars().all()
         return [MessageMapper.to_entity(m) for m in rows]

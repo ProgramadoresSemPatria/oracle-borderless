@@ -52,6 +52,26 @@ async def test_load_recent_respects_token_budget(db_session, monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_order_is_deterministic_within_same_transaction(db_session):
+    # Regressão: created_at é server-side func.now() = timestamp de início da transação,
+    # então três turnos gravados na MESMA transação (sem commit entre eles) recebem
+    # created_at idêntico. A ordem só é determinística por causa do tiebreak por uuid7
+    # (client-side, monotônico crescente) — não por sorte da ordem física das linhas.
+    conv = await _new_conversation(db_session)
+    repo = MessageRepository()
+    await repo.append(_msg(conv.uuid, "user", "primeira"))
+    await repo.append(_msg(conv.uuid, "assistant", "segunda"))
+    await repo.append(_msg(conv.uuid, "user", "terceira"))
+    await db_session.flush()
+
+    msgs = await repo.list_by_conversation(conv.uuid)
+    assert [m.content for m in msgs] == ["primeira", "segunda", "terceira"]
+
+    recent = await repo.load_recent(conv.uuid)
+    assert [m.content for m in recent] == ["primeira", "segunda", "terceira"]
+
+
+@pytest.mark.asyncio
 async def test_append_bumps_conversation_updated_at(db_session):
     conv = await _new_conversation(db_session)
     before = (await ConversationRepository().get_by_id(conv.uuid)).updated_at
