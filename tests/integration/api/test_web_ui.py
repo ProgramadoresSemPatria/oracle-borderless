@@ -12,3 +12,5 @@ async def test_root_serves_chat_page():
         assert resp.status_code == 200
         assert "text/html" in resp.headers["content-type"]
         assert "Oracle Borderless" in resp.text
+        assert 'id="conversations"' in resp.text  # sidebar de conversas
+        assert "Nova conversa" in resp.text
