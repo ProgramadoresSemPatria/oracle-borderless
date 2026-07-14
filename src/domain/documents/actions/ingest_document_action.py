@@ -5,6 +5,7 @@ from src.domain.documents.entities.document_chunk import DocumentChunk
 from src.domain.documents.repositories.document_chunk_repository import DocumentChunkRepository
 from src.domain.documents.repositories.document_repository import DocumentRepository
 from src.domain.documents.services.chunking_service import ChunkingService
+from src.domain.documents.services.notion_markup_cleaner import NotionMarkupCleaner
 from src.support.clients.embeddings.embeddings_client import EmbeddingsClient
 from src.support.core.exceptions import DomainError
 
@@ -18,6 +19,7 @@ class IngestDocumentAction:
 
     def __init__(self, embeddings: EmbeddingsClient) -> None:
         self.embeddings = embeddings
+        self.cleaner = NotionMarkupCleaner()
         self.chunking = ChunkingService()
         self.documents = DocumentRepository()
         self.chunks = DocumentChunkRepository()
@@ -28,7 +30,7 @@ class IngestDocumentAction:
 
         persisted = await self.documents.upsert(document)
 
-        texts = self.chunking.split(document.content)
+        texts = self.chunking.split(self.cleaner.clean(document.content))
         vectors = await self.embeddings.embed(texts)
         entities = [
             DocumentChunk(
