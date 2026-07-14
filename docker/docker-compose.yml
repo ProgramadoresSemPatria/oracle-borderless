@@ -9,7 +9,9 @@ services:
       POSTGRES_PASSWORD: oracle
       POSTGRES_DB: oracle_borderless
     ports:
-      - "5432:5432"
+      # Porta do host configurável (default 5432). start_dev ajusta DB_PORT
+      # automaticamente quando 5432 está ocupada por outro projeto.
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - oracle_borderless_pgdata:/var/lib/postgresql/data
     healthcheck:

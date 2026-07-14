@@ -60,7 +60,7 @@ class Settings(BaseSettings):
 
     # --- RAG ---
     RAG_TOP_K: int = 6
-    RAG_CHUNK_SIZE: int = 1200
+    RAG_CHUNK_SIZE: int = 1500
     RAG_CHUNK_OVERLAP: int = 200
 
     # Memória episódica (M2) — recência carregada na working memory

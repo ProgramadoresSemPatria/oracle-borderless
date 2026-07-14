@@ -30,6 +30,32 @@ async def test_ingest_persists_document_and_chunks(db_session):
 
 
 @pytest.mark.asyncio
+async def test_ingest_cleans_notion_markup_before_chunking(db_session):
+    """A ingestão limpa a sintaxe custom do Notion; nenhum chunk persiste markup cru."""
+    now = datetime(2026, 1, 1)
+    page_id = f"pid-{uuid4()}"
+    content = (
+        '## Guia {toggle="true"}\n'
+        '<callout icon="▶️" color="gray_bg">\nPasso importante do processo.\n</callout>\n'
+        "<empty-block/>"
+    )
+    doc = Document(uuid4(), page_id, "Guia", content, "https://n", "approved", now, now, None)
+
+    persisted = await IngestDocumentAction(embeddings=FakeEmbeddingsClient()).execute(doc)
+    await db_session.flush()
+
+    rows = (
+        await db_session.execute(
+            select(DocumentChunkModel.content).where(DocumentChunkModel.document_id == persisted.uuid)
+        )
+    ).scalars().all()
+    assert rows, "esperava ao menos um chunk"
+    blob = "\n".join(rows)
+    assert "<callout" not in blob and "<empty-block" not in blob and "{toggle" not in blob
+    assert "Passo importante do processo." in blob
+
+
+@pytest.mark.asyncio
 async def test_ingest_rejects_non_approved_document(db_session):
     """Regra 4 (base de conhecimento): documento não aprovado não pode ser ingerido nem persistido."""
     now = datetime(2026, 1, 1)
