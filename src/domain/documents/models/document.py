@@ -16,3 +16,4 @@ class DocumentModel(BaseModel, HasUUID, HasTimestamps, ApplyRelations):
     source_url: Mapped[str] = mapped_column(String(1024))
     status: Mapped[str] = mapped_column(String(20), index=True)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_edited_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

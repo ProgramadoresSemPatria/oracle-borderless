@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -36,8 +37,23 @@ class DocumentRepository:
             model = DocumentModel(**attrs)
             self.session.add(model)
         else:
-            for key in ("title", "content", "source_url", "status", "deleted_at"):
+            for key in ("title", "content", "source_url", "status", "deleted_at", "last_edited_time"):
                 setattr(model, key, attrs[key])
         await self.session.flush()
         await self.session.refresh(model)
         return DocumentMapper.to_entity(model)
+
+    async def list_all(self) -> list[Document]:
+        """Todos os documentos, incluindo soft-deleted (para o sync diferenciar)."""
+        result = await self.session.execute(select(DocumentModel))
+        return [DocumentMapper.to_entity(m) for m in result.scalars().all()]
+
+    async def soft_delete_by_page_id(self, page_id: str, when: datetime) -> None:
+        """Marca como removido (saiu do escopo aprovado). Retrieval já ignora deleted_at."""
+        result = await self.session.execute(
+            select(DocumentModel).where(DocumentModel.notion_page_id == page_id)
+        )
+        model = result.scalar_one_or_none()
+        if model is not None:
+            model.deleted_at = when
+            await self.session.flush()

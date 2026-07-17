@@ -19,4 +19,5 @@ class NotionPageMapper:
             created_at=now,
             updated_at=now,
             deleted_at=None,
+            last_edited_time=page.last_edited_time,
         )

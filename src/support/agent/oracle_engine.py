@@ -5,6 +5,10 @@ import logging
 from typing import AsyncIterator
 
 from pydantic_ai import Agent
+from pydantic_ai.models.anthropic import AnthropicModel
+from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.providers.anthropic import AnthropicProvider
+from pydantic_ai.providers.openai import OpenAIProvider
 
 from src.domain.shared.value_objects.citation import Citation
 from src.support.agent.ports import AgentMessage, AgentStreamChunk, KnowledgeSnippet
@@ -17,10 +21,22 @@ from src.support.core.settings import settings
 logger = logging.getLogger(__name__)
 
 
-def _model_id() -> str:
+def _build_model():
+    """Modelo pydantic-ai com a chave vinda de settings (não do ambiente).
+
+    O provider do pydantic-ai leria a API key de `os.environ`; como as chaves
+    vivem no `.env`/settings (não exportadas), injetamos explícito — igual ao
+    OpenAIEmbeddingsClient.
+    """
     if settings.LLM_PROVIDER == "openai":
-        return f"openai:{settings.OPENAI_MODEL}"
-    return f"anthropic:{settings.ANTHROPIC_MODEL}"
+        return OpenAIChatModel(
+            settings.OPENAI_MODEL,
+            provider=OpenAIProvider(api_key=settings.OPENAI_API_KEY),
+        )
+    return AnthropicModel(
+        settings.ANTHROPIC_MODEL,
+        provider=AnthropicProvider(api_key=settings.ANTHROPIC_API_KEY),
+    )
 
 
 def _build_prompt(question: str, history: list[AgentMessage], knowledge: list[KnowledgeSnippet]) -> str:
@@ -35,7 +51,7 @@ def _build_prompt(question: str, history: list[AgentMessage], knowledge: list[Kn
 
 class OracleEngine:
     def __init__(self, model=None) -> None:
-        self._model = model or _model_id()
+        self._model = model or _build_model()
 
     async def stream_answer(
         self,

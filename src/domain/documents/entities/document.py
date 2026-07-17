@@ -16,6 +16,7 @@ class Document:
     created_at: datetime
     updated_at: datetime
     deleted_at: datetime | None = None
+    last_edited_time: datetime | None = None  # last_edited_time do Notion (sync incremental)
 
     def is_approved(self) -> bool:
         return self.status == "approved" and self.deleted_at is None
