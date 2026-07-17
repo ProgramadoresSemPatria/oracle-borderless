@@ -15,6 +15,7 @@ class DocumentMapper:
             created_at=model.created_at,
             updated_at=model.updated_at,
             deleted_at=model.deleted_at,
+            last_edited_time=model.last_edited_time,
         )
 
     @staticmethod
@@ -27,4 +28,5 @@ class DocumentMapper:
             "source_url": entity.source_url,
             "status": entity.status,
             "deleted_at": entity.deleted_at,
+            "last_edited_time": entity.last_edited_time,
         }

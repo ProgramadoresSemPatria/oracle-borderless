@@ -11,8 +11,11 @@ Exemplo (quando houver jobs):
     schedule.call(CleanupConversationsJob).daily(hour=3)
 """
 
+from src.app.console.jobs.sync_knowledge_base_job import SyncKnowledgeBaseJob
 from src.support.core.scheduling import Schedule
 
 schedule = Schedule()
 
-# Nenhum job registrado ainda — ver docs/architecture.md → "Console e jobs".
+# Refresh incremental da base de conhecimento (Notion → pgvector). Diário às 04h;
+# ajuste a cadência conforme a frequência de mudança no Notion.
+schedule.call(SyncKnowledgeBaseJob).daily(hour=4)
