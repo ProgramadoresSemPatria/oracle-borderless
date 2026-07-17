@@ -25,6 +25,7 @@ por `---`. Fluxo recomendado:
 | [0007](0007-agent-framework-pydantic-ai.md) | Framework do agente = Pydantic AI (agnóstico de provedor) | Aceito |
 | [0008](0008-rag-hibrido-pgvector-mcp.md) | RAG híbrido (pgvector + MCP) e embeddings OpenAI | Aceito |
 | [0009](0009-streaming-sse.md) | Streaming das respostas do chat via SSE | Aceito |
+| [0010](0010-transporte-mcp-notion.md) | Transporte do Notion: MCP server via cliente `mcp` (não SDK REST) | Aceito |
 
 > ADR-0001–0006 são citados pelo `CLAUDE.md` mas ainda não foram escritos como arquivo.
 > As regras já estão em vigor (ver `CLAUDE.md` → "Regras inegociáveis"). Backfill quando
