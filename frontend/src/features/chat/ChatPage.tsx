@@ -65,7 +65,7 @@ export default function ChatPage() {
   // the conversation we just created and are already displaying live).
   useEffect(() => {
     if (conversationId && conversationId === liveConversationIdRef.current) return;
-    if (detail) {
+    if (detail && detail.id === conversationId) {
       setTurns(detail.messages.map((m) => ({ id: nextTurnId(), role: m.role, content: m.content, citations: m.sources })));
     } else if (!conversationId) {
       setTurns([]);

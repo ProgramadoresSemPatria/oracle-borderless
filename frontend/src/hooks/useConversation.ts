@@ -13,6 +13,7 @@ export function useConversation(id: string | undefined) {
       return;
     }
     let active = true;
+    setDetail(null);
     setLoading(true);
     getConversation(id)
       .then((d) => {
