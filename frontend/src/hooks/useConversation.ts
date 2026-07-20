@@ -9,6 +9,7 @@ export function useConversation(id: string | undefined) {
   useEffect(() => {
     if (!id) {
       setDetail(null);
+      setLoading(false);
       return;
     }
     let active = true;
