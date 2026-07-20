@@ -11,6 +11,23 @@ type Props = {
   userEmail: string;
 };
 
+const MONTHS_PT = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+
+function startOfDay(d: Date): number {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+}
+
+/** Small, dependency-free pt-BR relative date: "Hoje" / "Ontem" / "dd mmm". */
+function formatConversationDate(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const diffDays = Math.round((startOfDay(new Date()) - startOfDay(date)) / 86_400_000);
+  if (diffDays === 0) return "Hoje";
+  if (diffDays === 1) return "Ontem";
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${dd} ${MONTHS_PT[date.getMonth()]}`;
+}
+
 export function Sidebar({ conversations, activeId, onNew, onOpen, userEmail }: Props) {
   return (
     <aside className={styles.sidebar}>
@@ -25,6 +42,7 @@ export function Sidebar({ conversations, activeId, onNew, onOpen, userEmail }: P
               onClick={() => onOpen(c.id)}
             >
               <strong>{c.title ?? "(sem título)"}</strong>
+              <span className={styles.convMeta}>{formatConversationDate(c.updatedAt)}</span>
             </button>
           </li>
         ))}

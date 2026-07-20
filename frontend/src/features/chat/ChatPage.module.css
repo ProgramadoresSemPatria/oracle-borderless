@@ -7,6 +7,7 @@
 .convItem, .convActive { width: 100%; text-align: left; padding: 12px; border-radius: var(--radius-sm); color: var(--text); }
 .convItem:hover { background: var(--surface-2); }
 .convActive { background: var(--violet-soft); }
+.convMeta { display: block; margin-top: 2px; font-size: .72rem; color: var(--text-muted); }
 .sidebarFoot { display: grid; gap: 10px; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: var(--space-3); }
 .userChip { display: flex; align-items: center; gap: 10px; background: var(--surface-2); border-radius: var(--radius); padding: 10px; }
 .userChip span:last-child { color: var(--text-muted); font-size: .78rem; display: block; }
