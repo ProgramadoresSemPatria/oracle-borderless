@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 
 from src.domain.documents.actions.ingest_document_action import IngestDocumentAction
@@ -5,6 +6,9 @@ from src.domain.documents.dtos.sync_report import SyncReport
 from src.domain.documents.mappers.notion_page_mapper import NotionPageMapper
 from src.domain.documents.repositories.document_chunk_repository import DocumentChunkRepository
 from src.domain.documents.repositories.document_repository import DocumentRepository
+from src.support.core.context import CurrentAsyncSessionContext
+
+logger = logging.getLogger(__name__)
 
 
 def _is_stale(notion_ts: datetime | None, stored_ts: datetime | None) -> bool:
@@ -28,11 +32,18 @@ class SyncKnowledgeBaseAction:
         ingest: IngestDocumentAction,
         documents=None,
         chunks=None,
+        atomic=None,
     ) -> None:
         self.notion = notion
         self.ingest = ingest
         self.documents = documents or DocumentRepository()
         self.chunks = chunks or DocumentChunkRepository()
+        # Fronteira transacional por página: savepoint real em produção (rollback
+        # só da página que falha), injetável nos testes (nullcontext).
+        self._atomic = atomic or self._savepoint
+
+    def _savepoint(self):
+        return CurrentAsyncSessionContext.get().begin_nested()
 
     async def execute(self, force: bool = False, limit: int | None = None) -> SyncReport:
         approved = await self.notion.list_approved_pages()
@@ -57,9 +68,16 @@ class SyncKnowledgeBaseAction:
                 or _is_stale(page.last_edited_time, current.last_edited_time)
             )
             if needs_ingest:
-                full = await self.notion.get_page(page.id)
-                await self.ingest.execute(NotionPageMapper.to_document(full))
-                report.ingested += 1
+                try:
+                    async with self._atomic():
+                        full = await self.notion.get_page(page.id)
+                        await self.ingest.execute(NotionPageMapper.to_document(full))
+                    report.ingested += 1
+                except Exception as exc:  # falha de uma página não derruba o bloco
+                    logger.warning(
+                        "sync: falha ao ingerir %s (%s): %s", page.id, page.title, exc
+                    )
+                    report.failed += 1
             else:
                 report.skipped += 1
 

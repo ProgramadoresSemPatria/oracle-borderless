@@ -1,3 +1,4 @@
+from contextlib import nullcontext
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -41,10 +42,13 @@ class FakeNotion:
 
 
 class FakeIngest:
-    def __init__(self):
+    def __init__(self, fail_on: set[str] | None = None):
         self.executed: list[str] = []
+        self.fail_on = fail_on or set()
 
     async def execute(self, document: Document) -> Document:
+        if document.notion_page_id in self.fail_on:
+            raise RuntimeError(f"boom {document.notion_page_id}")
         self.executed.append(document.notion_page_id)
         return document
 
@@ -70,7 +74,10 @@ class FakeChunkRepo:
 
 
 def _action(notion, ingest, docs, chunks) -> SyncKnowledgeBaseAction:
-    return SyncKnowledgeBaseAction(notion=notion, ingest=ingest, documents=docs, chunks=chunks)
+    # atomic=nullcontext: em unit test não há sessão/savepoint real.
+    return SyncKnowledgeBaseAction(
+        notion=notion, ingest=ingest, documents=docs, chunks=chunks, atomic=nullcontext
+    )
 
 
 @pytest.mark.asyncio
@@ -148,6 +155,15 @@ async def test_limit_advances_past_already_ingested_pages():
     report = await _action(notion, ingest, docs, FakeChunkRepo()).execute(limit=2)
     assert ingest.executed == ["c", "d"]
     assert report.ingested == 2 and report.skipped == 2
+
+
+@pytest.mark.asyncio
+async def test_failing_page_is_counted_and_does_not_stop_others():
+    notion = FakeNotion([_approved("a", _dt(5)), _approved("bad", _dt(5)), _approved("c", _dt(5))])
+    ingest = FakeIngest(fail_on={"bad"})
+    report = await _action(notion, ingest, FakeDocRepo([]), FakeChunkRepo()).execute()
+    assert ingest.executed == ["a", "c"]  # 'bad' pulada, loop seguiu
+    assert report.ingested == 2 and report.failed == 1
 
 
 @pytest.mark.asyncio
