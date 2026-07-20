@@ -1,6 +1,9 @@
+import ReactMarkdown from "react-markdown";
 import type { Citation } from "../../../lib/types";
 import { Logo } from "../../../components/Logo/Logo";
 import { CitationsBlock } from "./CitationsBlock";
+import { stripHtml } from "../../../lib/utils/text";
+import { safeUrl } from "../../../lib/utils/safeUrl";
 import styles from "../ChatPage.module.css";
 
 type Props = {
@@ -19,7 +22,20 @@ export function MessageBubble({ role, content, citations, streaming }: Props) {
       <Logo size={34} />
       <div className={styles.botBody}>
         <div className={styles.botText}>
-          {content}
+          <ReactMarkdown
+            components={{
+              a: ({ href, children }) => {
+                const safe = href ? safeUrl(href) : null;
+                return safe ? (
+                  <a href={safe} target="_blank" rel="noreferrer">{children}</a>
+                ) : (
+                  <>{children}</>
+                );
+              },
+            }}
+          >
+            {stripHtml(content)}
+          </ReactMarkdown>
           {streaming && <span className={styles.cursor} />}
         </div>
         {citations && <CitationsBlock citations={citations} />}

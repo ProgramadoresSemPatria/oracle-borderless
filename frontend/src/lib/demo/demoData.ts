@@ -13,18 +13,25 @@ export interface KnowledgeDoc {
 
 const META_CITATIONS: Citation[] = [
   {
-    source_type: "SOP",
+    source_type: "notion",
     title: "SOP-GM-06 — Nomenclatura de Campanhas e Conjuntos de Anúncios",
     url: "https://www.notion.so/sop-gm-06",
     snippet: "Campanha: [🔥/❄] [Tipo] - [Funil]…",
     page_id: "sop-gm-06",
   },
   {
-    source_type: "SOP",
+    source_type: "notion",
     title: "SOP-GM-04 — UTM Convention & Rastreamento de Tráfego",
     url: "https://www.notion.so/sop-gm-04",
     snippet: "Padrão de UTMs por campanha e origem…",
     page_id: "sop-gm-04",
+  },
+  {
+    source_type: "web",
+    title: "Meta Ads — nomenclatura recomendada",
+    url: "https://www.facebook.com/business/help",
+    snippet: "Convenções recomendadas para nomear campanhas e conjuntos.",
+    page_id: null,
   },
 ];
 
@@ -66,6 +73,10 @@ export const DEMO_DOCUMENTS: KnowledgeDoc[] = [
 ];
 
 export const DEMO_ANSWER =
-  "A nomenclatura oficial está no SOP-GM-06 e usa uma estrutura de três níveis: campanha, conjunto e anúncio. O símbolo de temperatura (quente/frio) é obrigatório na campanha.";
+  "A nomenclatura oficial está no **SOP-GM-06** e segue três níveis:\n\n" +
+  "1. **Campanha** — `[🔥/❄] [Tipo] - [Funil]`\n" +
+  "2. **Conjunto de anúncios** — `[Verba] - [Público] - [Tema]`\n" +
+  "3. **Anúncio** — `[Editor] - [Nome]`\n\n" +
+  "O símbolo de temperatura (quente/frio) é **obrigatório** na campanha.";
 
 export const DEMO_ANSWER_CITATIONS = META_CITATIONS;

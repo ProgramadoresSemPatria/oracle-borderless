@@ -28,7 +28,19 @@
 .userBubble { background: var(--violet); padding: 14px 18px; border-radius: 16px 16px 4px 16px; max-width: 70%; }
 .botTurn { display: flex; gap: 14px; align-items: flex-start; }
 .botBody { flex: 1; min-width: 0; }
-.botText { white-space: pre-wrap; line-height: 1.6; }
+.botText { line-height: 1.6; }
+.botText > :first-child { margin-top: 0; }
+.botText p { margin: 0 0 var(--space-3); }
+.botText h1, .botText h2, .botText h3 { margin: var(--space-4) 0 var(--space-2); line-height: 1.25; }
+.botText h1 { font-size: 1.25rem; }
+.botText h2 { font-size: 1.15rem; }
+.botText h3 { font-size: 1.02rem; }
+.botText ul, .botText ol { margin: 0 0 var(--space-3); padding-left: 1.4em; }
+.botText li { margin: 2px 0; }
+.botText strong { font-weight: 700; }
+.botText a { color: var(--emerald); text-decoration: underline; }
+.botText code { font-family: var(--font-mono); font-size: .9em; background: var(--surface-2); padding: 1px 5px; border-radius: 6px; }
+.botText pre { background: var(--surface-2); padding: var(--space-3); border-radius: var(--radius-sm); overflow-x: auto; }
 .cursor { display: inline-block; width: 8px; height: 1.1em; margin-left: 2px; background: var(--emerald); vertical-align: text-bottom; animation: blink 1s steps(2) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 .thinking { display: inline-flex; gap: 6px; padding: 10px 0; }
@@ -43,6 +55,8 @@
 .citationIndex { margin-left: auto; font-family: var(--font-mono); color: var(--text-muted); }
 .citationBody { padding: 0 14px 14px; color: var(--text-muted); display: grid; gap: 8px; }
 .citationBody a { color: var(--emerald); }
+.citationTag { font-family: var(--font-mono); font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; background: var(--violet-soft); color: #c9b6ff; white-space: nowrap; }
+.citationRef { color: var(--text-muted); font-size: .85rem; }
 .errorBox { background: rgba(240,52,52,.1); border: 1px solid rgba(240,52,52,.4); border-radius: var(--radius); padding: var(--space-4); display: grid; gap: 10px; justify-items: start; }
 .retry { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 14px; }
 .composerWrap { padding: var(--space-4) var(--space-6) var(--space-5); }

@@ -2,18 +2,16 @@
   <defs>
     <linearGradient id="v" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#6B34F0"/>
-      <stop offset="1" stop-color="#3A1E9E"/>
+      <stop offset="1" stop-color="#4A22C0"/>
     </linearGradient>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#34E8AD"/>
-      <stop offset="1" stop-color="#1CB98A"/>
+    <linearGradient id="g" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#2FDBA2"/>
+      <stop offset="1" stop-color="#3BE8B0"/>
     </linearGradient>
   </defs>
-  <!-- Violet stroke: left stem + top-left hook curving to center -->
-  <path fill="url(#v)" d="M336 324h132v300a132 132 0 0 1-132 132V324z"/>
-  <path fill="url(#v)" d="M612 324h132v210a132 132 0 0 1-132 132 132 132 0 0 0 0-264V324z" opacity="0.92"/>
-  <!-- Emerald stroke: center bowl curving down to the right stem -->
-  <path fill="url(#g)" d="M468 420a276 276 0 0 1 276 276h-132a144 144 0 0 0-144-144z"/>
-  <path fill="url(#g)" d="M612 540h132v216a132 132 0 0 1-132-132V540z"/>
-  <path fill="url(#g)" d="M336 624h132v132a132 132 0 0 1-132-132z" opacity="0.9"/>
+  <rect width="1080" height="1080" fill="#0B0B0D"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="130">
+    <path stroke="url(#v)" d="M400 748 V468 C400 386 474 340 566 358"/>
+    <path stroke="url(#g)" d="M400 566 C424 474 506 436 594 452 C674 466 706 524 706 598 V748"/>
+  </g>
 </svg>
