@@ -9,9 +9,10 @@ class SyncReport:
     ingested: int = 0
     skipped: int = 0
     removed: int = 0
+    failed: int = 0
 
     def __str__(self) -> str:
         return (
-            f"aprovadas={self.total_approved} "
-            f"ingeridas={self.ingested} inalteradas={self.skipped} removidas={self.removed}"
+            f"aprovadas={self.total_approved} ingeridas={self.ingested} "
+            f"inalteradas={self.skipped} removidas={self.removed} falhas={self.failed}"
         )
