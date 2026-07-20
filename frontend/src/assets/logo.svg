@@ -1,17 +1,20 @@
 <svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Oracle Borderless">
   <defs>
-    <linearGradient id="v" x1="0" y1="0" x2="1" y2="1">
+    <!-- Cada fita vai de violeta (topo) a esmeralda (base), como na logo. -->
+    <linearGradient id="ribbon" gradientUnits="userSpaceOnUse" x1="540" y1="330" x2="540" y2="772">
       <stop offset="0" stop-color="#6B34F0"/>
-      <stop offset="1" stop-color="#4A22C0"/>
-    </linearGradient>
-    <linearGradient id="g" x1="0" y1="1" x2="1" y2="0">
-      <stop offset="0" stop-color="#2FDBA2"/>
-      <stop offset="1" stop-color="#3BE8B0"/>
+      <stop offset="0.42" stop-color="#5B2CE6"/>
+      <stop offset="0.62" stop-color="#3AA9C9"/>
+      <stop offset="1" stop-color="#2FDBA2"/>
     </linearGradient>
   </defs>
+
+  <!-- Fundo quadrado escuro -->
   <rect width="1080" height="1080" fill="#0B0B0D"/>
-  <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="130">
-    <path stroke="url(#v)" d="M400 748 V468 C400 386 474 340 566 358"/>
-    <path stroke="url(#g)" d="M400 566 C424 474 506 436 594 452 C674 466 706 524 706 598 V748"/>
+
+  <!-- Duas fitas espelhadas: verticais no topo/base + cruzamento no centro (entrelaçado) -->
+  <g fill="none" stroke="url(#ribbon)" stroke-width="150" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M408 344 V472 L672 608 V756"/>
+    <path d="M672 344 V472 L408 608 V756"/>
   </g>
 </svg>
