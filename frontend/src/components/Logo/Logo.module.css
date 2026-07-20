@@ -1,0 +1,9 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 28%;
+  padding: 14%;
+}
+.chip img { width: 100%; height: 100%; }

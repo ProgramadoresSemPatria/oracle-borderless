@@ -1,0 +1,33 @@
+:root {
+  /* Brand — sampled from the logo */
+  --violet: #5B27E0;
+  --indigo: #3A1E9E;
+  --indigo-deep: #241C63;
+  --emerald: #2FE0A6;
+  --teal: #1CB98A;
+
+  /* Surfaces */
+  --bg: #0B0B0D;
+  --surface-1: #14141A;
+  --surface-2: #1C1C24;
+  --border: #26262F;
+
+  /* Text */
+  --text: #F5F5F7;
+  --text-muted: #A0A0AB;
+
+  /* Accents */
+  --gradient: linear-gradient(135deg, var(--violet), var(--emerald));
+  --violet-soft: rgba(91, 39, 224, 0.16);
+  --emerald-soft: rgba(47, 224, 166, 0.14);
+
+  /* Scale */
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 22px;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-8: 48px; --space-10: 72px;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+  --maxw: 1200px;
+}

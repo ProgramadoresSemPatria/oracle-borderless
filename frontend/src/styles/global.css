@@ -1,0 +1,18 @@
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  background-image:
+    radial-gradient(60% 50% at 15% 0%, rgba(91, 39, 224, 0.12), transparent 70%),
+    radial-gradient(50% 40% at 100% 100%, rgba(47, 224, 166, 0.08), transparent 70%);
+  background-attachment: fixed;
+}
+h1, h2, h3 { line-height: 1.1; letter-spacing: -0.02em; font-weight: 800; }
+.container { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--space-5); }
+.text-gradient {
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.eyebrow { color: var(--emerald); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.78rem; }
