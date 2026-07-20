@@ -64,7 +64,7 @@ frontend/
     └── features/
         ├── landing/
         │   ├── LandingPage.tsx
-        │   └── components/       # Hero, ComoFunciona, Diferenciais, CtaFinal
+        │   └── components/       # Hero, HowItWorks, Differentiators, FinalCta
         ├── about/
         │   └── AboutPage.tsx     # Sobre & Fontes (cards + "fluxo do conhecimento" + aviso Restrito)
         ├── knowledge/
@@ -89,10 +89,12 @@ frontend/
 | Rota | Tela |
 |---|---|
 | `/` | Landing |
-| `/sobre` | Sobre & Fontes |
-| `/base` | Base de conhecimento |
-| `/oraculo` | App de chat (estado vazio) |
-| `/oraculo/:conversationId` | App de chat com conversa aberta |
+| `/about` | Sobre & Fontes |
+| `/knowledge` | Base de conhecimento |
+| `/oracle` | App de chat (estado vazio) |
+| `/oracle/:conversationId` | App de chat com conversa aberta |
+
+**Convenção de idioma:** rotas, nomes de funções, tipos, componentes e arquivos em **inglês**; todo **texto visível ao usuário em pt-BR** (headings, labels, chips, mensagens, dados de exemplo do modo demo).
 
 ## Contrato da API (espelhado do backend)
 
