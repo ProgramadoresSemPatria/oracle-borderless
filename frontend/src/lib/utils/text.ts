@@ -1,6 +1,6 @@
-/** Remove HTML tags. */
+/** Remove HTML tags, but leave math comparisons like "score < 60" / "x > 0" intact. */
 export function stripHtml(input: string): string {
-  return input.replace(/<[^>]*>/g, "");
+  return input.replace(/<\/?[a-zA-Z][a-zA-Z0-9-]*(?:\s[^<>]*)?\/?>/g, "");
 }
 
 /** Reduce markdown + HTML to clean plain text (for previews/snippets). */

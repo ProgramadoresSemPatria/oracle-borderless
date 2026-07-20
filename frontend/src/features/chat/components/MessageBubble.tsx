@@ -32,6 +32,7 @@ export function MessageBubble({ role, content, citations, streaming }: Props) {
                   <>{children}</>
                 );
               },
+              img: ({ alt }) => <>{alt ?? ""}</>,
             }}
           >
             {stripHtml(content)}

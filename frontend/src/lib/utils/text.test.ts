@@ -5,6 +5,21 @@ describe("stripHtml", () => {
   it("removes HTML tags", () => {
     expect(stripHtml("<details><summary>x</summary>y</details>")).toBe("xy");
   });
+
+  it("preserves math comparisons (does not treat < > as tags)", () => {
+    expect(stripHtml("score < 60 e resultado > 0")).toBe("score < 60 e resultado > 0");
+  });
+
+  it("still removes real HTML tags including attributes", () => {
+    expect(stripHtml('<a href="http://x">link</a>')).toBe("link");
+    expect(stripHtml("<details><summary>x</summary>y</details>")).toBe("xy");
+  });
+
+  it("keeps comparisons intact through toPlainText", () => {
+    const out = toPlainText("Se score < 60 então reprova; caso > 90, destaque.");
+    expect(out).toContain("< 60");
+    expect(out).toContain("> 90");
+  });
 });
 
 describe("toPlainText", () => {

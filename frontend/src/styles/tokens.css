@@ -18,8 +18,8 @@
 
   /* Accents */
   --gradient: linear-gradient(135deg, var(--violet), var(--emerald));
-  --violet-soft: rgba(91, 39, 224, 0.16);
-  --emerald-soft: rgba(47, 224, 166, 0.14);
+  --violet-soft: rgba(91, 44, 230, 0.16);
+  --emerald-soft: rgba(47, 219, 162, 0.14);
 
   /* Scale */
   --radius-sm: 8px;
