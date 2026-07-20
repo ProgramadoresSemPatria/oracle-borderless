@@ -40,4 +40,9 @@ describe("parseSSE", () => {
     const events = await collect(streamOf(["event: token\ndata: {}"]));
     expect(events).toEqual([]);
   });
+
+  it("joins multiple data: lines within one event", async () => {
+    const events = await collect(streamOf(["event: token\ndata: line1\ndata: line2\n\n"]));
+    expect(events).toEqual([{ event: "token", data: "line1\nline2" }]);
+  });
 });
