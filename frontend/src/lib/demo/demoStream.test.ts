@@ -15,6 +15,19 @@ describe("demoStream", () => {
     expect(events.some((e) => e.type === "token")).toBe(true);
     expect(events.some((e) => e.type === "sources")).toBe(true);
     expect(events.at(-1)?.type).toBe("done");
+
+    // Assert strict relative ordering
+    const types = events.map((e) => e.type);
+    const firstToken = types.indexOf("token");
+    const lastToken = types.lastIndexOf("token");
+    const sourcesIdx = types.indexOf("sources");
+    const doneIdx = types.indexOf("done");
+
+    expect(types[0]).toBe("conversation"); // conversation first
+    expect(firstToken).toBeGreaterThan(0); // tokens after conversation
+    expect(sourcesIdx).toBeGreaterThan(lastToken); // sources after the last token
+    expect(doneIdx).toBe(types.length - 1); // done last
+    expect(sourcesIdx).toBeLessThan(doneIdx); // sources before done
   });
 
   it("emits an error path for the [demo-error] sentinel", async () => {
