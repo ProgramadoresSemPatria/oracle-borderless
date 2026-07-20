@@ -1,13 +1,13 @@
 :root {
-  /* Brand — sampled from the logo */
-  --violet: #5B2CE6;
-  --indigo: #3A1E9E;
-  --indigo-deep: #241C63;
-  --emerald: #2FDBA2;
-  --teal: #1CB98A;
+  /* Brand — exact hex sampled from the official logo */
+  --violet: #4117A3;
+  --indigo: #3F179F;
+  --indigo-deep: #221060;
+  --emerald: #25C494;
+  --teal: #23BD8F;
 
   /* Surfaces */
-  --bg: #0B0B0D;
+  --bg: #080808;
   --surface-1: #14141A;
   --surface-2: #1C1C24;
   --border: #26262F;
@@ -18,8 +18,8 @@
 
   /* Accents */
   --gradient: linear-gradient(135deg, var(--violet), var(--emerald));
-  --violet-soft: rgba(91, 44, 230, 0.16);
-  --emerald-soft: rgba(47, 219, 162, 0.14);
+  --violet-soft: rgba(65, 23, 163, 0.20);
+  --emerald-soft: rgba(37, 196, 148, 0.14);
 
   /* Scale */
   --radius-sm: 8px;

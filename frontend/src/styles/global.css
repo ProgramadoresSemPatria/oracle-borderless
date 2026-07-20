@@ -3,8 +3,8 @@ body {
   background: var(--bg);
   color: var(--text);
   background-image:
-    radial-gradient(60% 50% at 15% 0%, rgba(91, 39, 224, 0.12), transparent 70%),
-    radial-gradient(50% 40% at 100% 100%, rgba(47, 224, 166, 0.08), transparent 70%);
+    radial-gradient(60% 50% at 15% 0%, rgba(65, 23, 163, 0.16), transparent 70%),
+    radial-gradient(50% 40% at 100% 100%, rgba(37, 196, 148, 0.09), transparent 70%);
   background-attachment: fixed;
 }
 h1, h2, h3 { line-height: 1.1; letter-spacing: -0.02em; font-weight: 800; }
