@@ -29,10 +29,12 @@ class _FakeEngine:
     def __init__(self):
         self.received_history = None
         self.received_question = None
+        self.received_knowledge = None
 
     async def stream_answer(self, question, history, knowledge):
         self.received_history = history
         self.received_question = question
+        self.received_knowledge = knowledge
         yield AgentStreamChunk(type="text", text="ok")
 
 
@@ -168,6 +170,7 @@ async def test_gate_skip_injects_no_knowledge_and_skips_search():
         pass
 
     assert search.calls == []  # não recuperou
+    assert engine.received_knowledge == []
 
 
 @pytest.mark.asyncio

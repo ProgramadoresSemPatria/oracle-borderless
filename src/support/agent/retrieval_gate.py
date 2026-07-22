@@ -72,13 +72,12 @@ class RetrievalGate:
                 self._agent.run(prompt), timeout=settings.GATE_TIMEOUT_SECONDS
             )
             decision = result.output
+            if decision.retrieve and not decision.search_query.strip():
+                return RetrievalDecision(retrieve=True, search_query=question)
+            return decision
         except Exception:  # fail-open: uma recuperação a mais > uma perdida
             logger.warning("retrieval gate falhou; fail-open (query crua)", exc_info=True)
             return RetrievalDecision(retrieve=True, search_query=question)
-
-        if decision.retrieve and not decision.search_query.strip():
-            return RetrievalDecision(retrieve=True, search_query=question)
-        return decision
 
 
 def get_retrieval_gate() -> "RetrievalGate":
