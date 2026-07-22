@@ -49,6 +49,9 @@ class Settings(BaseSettings):
     ANTHROPIC_MODEL: str = "claude-opus-4-8"
     OPENAI_API_KEY: str | None = None
     OPENAI_MODEL: str = "gpt-4o"
+    ANTHROPIC_SMALL_MODEL: str = "claude-haiku-4-5-20251001"
+    OPENAI_SMALL_MODEL: str = "gpt-4o-mini"
+    GATE_TIMEOUT_SECONDS: float = 5.0
 
     # --- Embeddings (desacoplado do provedor de chat; ver ADR-0008) ---
     EMBEDDING_PROVIDER: Literal["openai"] = "openai"
