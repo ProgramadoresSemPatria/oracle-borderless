@@ -28,9 +28,11 @@ class _FakeSearch:
 class _FakeEngine:
     def __init__(self):
         self.received_history = None
+        self.received_question = None
 
     async def stream_answer(self, question, history, knowledge):
         self.received_history = history
+        self.received_question = question
         yield AgentStreamChunk(type="text", text="ok")
 
 
@@ -182,3 +184,4 @@ async def test_gate_retrieve_uses_rewritten_query():
         pass
 
     assert search.calls == ["renovação de PSP"]  # query reescrita, não a crua
+    assert engine.received_question == "e as renovações?"  # engine recebe pergunta original
